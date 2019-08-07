@@ -68,13 +68,16 @@ router.put('/:soldierId', (req, res) => {
       // delete ref from old superior: 'soldier.superior'
       Soldier.findById({ _id: oldSuperior })
         .then(soldier => {
+          //   console.log('A ', oldSuperior);
+          //   console.log('B ', soldier.directsubordinates);
           soldier.directsubordinates = [
             ...soldier.directsubordinates.filter(
-              ds => ds.soldierId.toString() !== oldSuperior.toString()
+              ds => ds.soldierId.toString() !== req.params.soldierId.toString()
             )
           ];
+          //   console.log('C ', soldier.directsubordinates);
           soldier
-            .save() // save is necessary!
+            .save()
             .then(() => {
               // add ref to new superior: 'req.body.superior'
               Soldier.findById({ _id: newSuperior }).then(soldier => {
@@ -82,27 +85,25 @@ router.put('/:soldierId', (req, res) => {
                   ...soldier.directsubordinates,
                   { soldierId: req.params.soldierId }
                 ];
-                soldier
-                  .save() // save is necessary!
-                  .then(() => {
-                    Soldier.findByIdAndUpdate(req.params.soldierId, {
-                      $set: {
-                        name: req.body.name,
-                        rank: req.body.rank,
-                        sex: req.body.sex,
-                        startdate: req.body.startdate,
-                        phone: req.body.phone,
-                        email: req.body.email,
-                        avatar: req.body.avatar,
-                        superior: req.body.superior
-                        // directsubordinates: []
-                      }
-                    })
-                      .then(soldier => res.status(200).json(soldier))
-                      .catch(err =>
-                        res.status(500).json({ error: 'Failed to edit' })
-                      );
-                  });
+                soldier.save().then(() => {
+                  Soldier.findByIdAndUpdate(req.params.soldierId, {
+                    $set: {
+                      name: req.body.name,
+                      rank: req.body.rank,
+                      sex: req.body.sex,
+                      startdate: req.body.startdate,
+                      phone: req.body.phone,
+                      email: req.body.email,
+                      avatar: req.body.avatar,
+                      superior: req.body.superior
+                      // directsubordinates: []
+                    }
+                  })
+                    .then(soldier => res.status(200).json(soldier))
+                    .catch(err =>
+                      res.status(500).json({ error: 'Failed to edit' })
+                    );
+                });
               });
             })
             .catch(err =>
