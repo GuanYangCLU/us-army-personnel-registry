@@ -48,14 +48,18 @@ router.post('/', async (req, res) => {
       });
       const soldier = await newSoldier.save();
 
-      const superior = await Soldier.findOne({ _id: req.body.superior });
-      superior.directsubordinates = [
-        ...superior.directsubordinates,
-        soldier._id
-      ];
-      await superior.save();
+      const superior = await Soldier.findOneAndUpdate(
+        { _id: req.body.superior },
+        { $addToSet: { directsubordinates: soldier._id } },
+        { new: true }
+      );
 
-      res.status(200).json(soldier);
+      res.status(200).json({
+        code: 0,
+        data: {
+          soldier
+        }
+      });
     } catch (err) {
       res.status(500).json({ error: 'Failed to create' + err });
     }

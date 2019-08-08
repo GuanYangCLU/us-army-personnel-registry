@@ -36,17 +36,9 @@ const SoldierSchema = new mongoose.Schema({
     type: String
   },
   superior: {
-    type: Schema.Types.ObjectId,
-    ref: 'soldiers'
+    type: Schema.Types.ObjectId
   },
-  directsubordinates: [
-    {
-      //   soldierId: {
-      type: Schema.Types.ObjectId,
-      ref: 'soldiers'
-      //   }
-    }
-  ]
+  directsubordinates: [Schema.Types.ObjectId]
 });
 
 const Soldier = mongoose.model('soldier', SoldierSchema);
