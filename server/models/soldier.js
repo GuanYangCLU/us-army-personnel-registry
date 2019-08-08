@@ -32,16 +32,19 @@ const SoldierSchema = new mongoose.Schema({
     // required: true,
     default: '../../public/avatar/default.png'
   },
+  superiorname: {
+    type: String
+  },
   superior: {
     type: Schema.Types.ObjectId,
     ref: 'soldiers'
   },
   directsubordinates: [
     {
-      soldierId: {
-        type: Schema.Types.ObjectId,
-        ref: 'soldiers'
-      }
+      //   soldierId: {
+      type: Schema.Types.ObjectId,
+      ref: 'soldiers'
+      //   }
     }
   ]
 });
