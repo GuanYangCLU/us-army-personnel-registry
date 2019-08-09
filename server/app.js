@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
-const soldiers = require('./routes/soldiers');
+const users = require('./routes/users');
 
 const app = express();
 
@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 //   });
 
 // Routes
-app.use('/api/soldiers', soldiers);
+app.use('/api/users', users);
 
 // Static
 app.use(express.static('client/public'));
