@@ -46,7 +46,7 @@ const deleteUserNoSupHasSub = async userId => {
 const deleteUserHasSupNoSub = async (userId, superiorId) => {
   try {
     // const ds = 0;
-    await UserModel.deleteUserSubordinates(superiorId, userId, []);
+    await UserModel.deleteUserSubordinates(superiorId, userId);
     return await UserModel.deleteUserById(userId);
   } catch (err) {
     console.log(err);
@@ -60,11 +60,8 @@ const deleteUserHasSupHasSub = async (
   directsubordinates
 ) => {
   try {
-    await UserModel.deleteteUserSubordinates(
-      superiorId,
-      userId,
-      directsubordinates
-    );
+    await UserModel.transferUserSubordinates(superiorId, directsubordinates);
+    await UserModel.deleteUserSubordinates(superiorId, userId);
     return await UserModel.deleteUserById(userId);
   } catch (err) {
     console.log(err);
@@ -72,45 +69,6 @@ const deleteUserHasSupHasSub = async (
   }
 };
 
-// {
-//   Soldier.findById({ _id: req.params.soldierId })
-//     .then(soldier => {
-//       // soldier to be deleted
-//       const deleteId = req.params.soldierId;
-//       const deleteDs = [...soldier.directsubordinates];
-//       const superiorId = soldier.superior;
-
-//       Soldier.findById({ _id: superiorId })
-//         .then(soldier => {
-//           //   console.log('A ', soldier.directsubordinates);
-//           //   console.log('B ', deleteId);
-//           soldier.directsubordinates = [
-//             ...soldier.directsubordinates.filter(
-//               ds => ds.soldierId.toString() !== deleteId.toString()
-//               // here, two types are different by testing
-//             ),
-//             ...deleteDs
-//           ];
-//           //   console.log('C ', soldier.directsubordinates);
-//           soldier
-//             .save() // save is necessary!
-//             .then(() => {
-//               Soldier.findByIdAndDelete({ _id: req.params.soldierId })
-//                 .then(soldier => res.status(200).json(soldier))
-//                 .catch(err =>
-//                   res.status(500).json({ error: 'Failed to delete' })
-//                 );
-//             })
-//             .catch(err =>
-//               res.status(500).json({ error: 'Failed to delete' + err })
-//             );
-//         })
-//         .catch(err =>
-//           res.status(500).json({ error: 'Failed to delete' + err })
-//         );
-//     })
-//     .catch(err => res.status(500).json({ error: 'Failed to create' + err }));
-// }
 module.exports = {
   createUserWithoutSuperior,
   createUserWithSuperior,

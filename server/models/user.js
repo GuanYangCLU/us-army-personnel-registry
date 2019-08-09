@@ -119,20 +119,27 @@ const updateUserSubordinates = async (userId, dsId, ds) => {
   // });
 };
 
-const deleteUserSubordinates = async (userId, dsId, ds) => {
-  // let dsa = [];
-  // if (ds === 0) dsa = [];
-  // else dsa = [...ds];
+const transferUserSubordinates = async (userId, ds) => {
   return await User.findOneAndUpdate(
     { _id: userId },
-    // {
-    //   $push: {
-    //     directsubordinates: {
-    //       $each: [...ds]
-    //       // $position: 0
-    //     }
-    //   }
-    // },
+    {
+      $push: {
+        directsubordinates: {
+          $each: [...ds]
+          // $position: 0
+        }
+      }
+    },
+    { new: true }
+  ).catch(err => {
+    console.log(err);
+    throw new Error('error transfering user subordinates');
+  });
+};
+
+const deleteUserSubordinates = async (userId, dsId) => {
+  return await User.findOneAndUpdate(
+    { _id: userId },
     {
       $pull: {
         directsubordinates: dsId
@@ -174,5 +181,6 @@ module.exports = {
   updateUserSubordinates,
   deleteUserSubordinates,
   deleteUserSuperior,
-  deleteUserById
+  deleteUserById,
+  transferUserSubordinates
 };
