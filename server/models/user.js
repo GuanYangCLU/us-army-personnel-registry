@@ -141,7 +141,7 @@ const deleteUserSuperior = async supId => {
 };
 
 const deleteUserById = async userId => {
-  // connot add {new: true}, why?
+  // cannot add {new: true}, why?
   return await User.findByIdAndDelete({ _id: userId }).catch(err => {
     console.log(err);
     throw new Error(`error deleting user by id: ${userId}`);
