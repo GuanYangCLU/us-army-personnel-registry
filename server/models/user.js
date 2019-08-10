@@ -95,30 +95,6 @@ const addUserSubordinates = async (userId, dsId) => {
   });
 };
 
-const updateUserSubordinates = async (userId, dsId, ds) => {
-  // return await User.findOneAndUpdate(
-  //   { _id: userId },
-  //   {
-  //     $push: {
-  //       directsubordinates: {
-  //         $each: [...ds]
-  //         // $position: 0
-  //       }
-  //     }
-  //   },
-  //   {
-  //     $pull: {
-  //       directsubordinates: dsId
-  //     }
-  //     // { $pull: { array: { $in: [ "a", "b" ] } } delete many
-  //   },
-  //   { new: true }
-  // ).catch(err => {
-  //   console.log(err);
-  //   throw new Error('error updating user subordinates');
-  // });
-};
-
 const transferUserSubordinates = async (userId, ds) => {
   return await User.findOneAndUpdate(
     { _id: userId },
@@ -160,7 +136,7 @@ const deleteUserSuperior = async supId => {
     { new: true }
   ).catch(err => {
     console.log(err);
-    throw new Error('error updating user superior');
+    throw new Error('error deleting user superior');
   });
 };
 
@@ -172,15 +148,56 @@ const deleteUserById = async userId => {
   });
 };
 
+const updateUserById = async (userId, userData) => {
+  if (userData.superior === '' || userData.superiorname === '') {
+    // if you don't pass sth, it may send an empty string
+    // while id is not a simple string
+    userData.superior = null;
+    userData.superiorname = null;
+  }
+  return await User.findOneAndUpdate(
+    { _id: userId },
+    {
+      $set: {
+        name: userData.name,
+        rank: userData.rank,
+        sex: userData.sex,
+        startdate: userData.startdate,
+        phone: userData.phone,
+        email: userData.email,
+        avatar: userData.avatar,
+        superior: userData.superior,
+        superiorname: userData.superiorname
+      }
+    },
+    { new: true }
+  ).catch(err => {
+    console.log(err);
+    throw new Error(`error updating user by id: ${userId}`);
+  });
+};
+
+const updateUserSuperior = async (supId, newSupId, newSupName) => {
+  return await User.updateMany(
+    { superior: supId },
+    { $set: { superior: newSupId, superiorname: newSupName } },
+    { new: true }
+  ).catch(err => {
+    console.log(err);
+    throw new Error('error updating user superior');
+  });
+};
+
 module.exports = {
   model: User,
   getUsers,
   getUserById,
   createUser,
   addUserSubordinates,
-  updateUserSubordinates,
   deleteUserSubordinates,
   deleteUserSuperior,
   deleteUserById,
-  transferUserSubordinates
+  transferUserSubordinates,
+  updateUserById,
+  updateUserSuperior
 };
