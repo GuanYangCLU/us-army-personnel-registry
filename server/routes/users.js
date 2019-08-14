@@ -66,7 +66,8 @@ router.delete('/:userId', async (req, res) => {
 
 // Sort user
 // sortType, searchWord, pageNumber
-// post? should get when refresh
+
+// params : mongoose paginate
 router.get('/sort/:sortType', async (req, res) => {
   try {
     const user = await UserController.sortUsers(req.params.sortType);
