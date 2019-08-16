@@ -4,9 +4,21 @@ const UserModel = require('../models/user');
 // const UserService = require('../services/user');
 const UserController = require('../controllers/user');
 
-router.get('/', async (req, res) => {
+// searchText, sortType, pageSize or limit, pageNumber or page/offset
+// params : mongoose paginate
+
+router.get('/:pageSize/:pageNumber/:sortType/:searchText', async (req, res) => {
   try {
-    const users = await UserModel.getUsers();
+    if (req.params.searchText === '__NO_SEARCH_TEXT__') {
+      req.params.searchText = '';
+    }
+    const query = {
+      pageSize: req.params.pageSize,
+      pageNumber: req.params.pageNumber,
+      sortType: req.params.sortType,
+      searchText: req.params.searchText
+    };
+    const users = await UserModel.getUsers(query);
     res.status(200).json(users);
   } catch (err) {
     res.status(404).json({ error: 'No user found: ' + err });
@@ -61,22 +73,6 @@ router.delete('/:userId', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete' + err });
-  }
-});
-
-// Sort user
-// sortType, searchWord, pageNumber
-
-// params : mongoose paginate
-router.get('/sort/:sortType', async (req, res) => {
-  try {
-    const user = await UserController.sortUsers(req.params.sortType);
-    res.status(200).json({
-      code: 0,
-      data: { user }
-    });
-  } catch (err) {
-    res.status(404).json({ error: 'No user found : ' + err });
   }
 });
 

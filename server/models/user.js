@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 const Schema = mongoose.Schema;
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -42,17 +43,57 @@ const UserSchema = new mongoose.Schema({
   directsubordinates: [Schema.Types.ObjectId]
 });
 
-// const DEFAULT_PROJECTION = { phone: '800-000-0000', __v: 0 };
+// Use mongoose paginate
+UserSchema.plugin(mongoosePaginate);
 
 const User = mongoose.model('user', UserSchema);
 
-const getUsers = async (params = { page: 0, pageSize: 10 }) => {
-  let flow = User.find({});
-  if (params.page && params.pageSize) {
-    //   flow.select(DEFAULT_PROJECTION);
-    flow.skip(params.page * params.pageSize);
-    flow.limit(params.pageSize);
-  }
+const getUsers = async params => {
+  const { pageSize, pageNumber, sortType, searchText } = params;
+  let regex = new RegExp(searchText, 'gim');
+  const query = {
+    $or: [
+      { name: regex },
+      { rank: regex },
+      { sex: regex },
+      // { startdate: regex },
+      { phone: regex },
+      { email: regex },
+      { superiorname: regex }
+    ]
+  };
+  const sortOrder = [
+    {}, // 0
+    { name: 1 }, // 1
+    { name: -1 }, // 2
+    { rank: 1 }, // 3
+    { rank: -1 }, // 4
+    { sex: 1 }, // 5
+    { sex: -1 }, // 6
+    { startdate: 1 }, // 7
+    { startdate: -1 }, // 8
+    { phone: 1 }, // 9
+    { phone: -1 }, // 10
+    { email: 1 }, // 11
+    { email: -1 }, // 12
+    { superiorname: 1 }, // 13
+    { superiorname: -1 } // 14
+  ];
+  const options = {
+    // select: '',
+    sort: sortOrder[sortType], // obj e.g. { name: -1 }
+    // populate: '',
+    lean: true, // return JSON not doc
+    // offset: 20,
+    page: pageNumber,
+    limit: pageSize
+  };
+  let flow = User.paginate(query, options);
+  // if (params.page && params.pageSize) {
+  //   //   flow.select(DEFAULT_PROJECTION);
+  //   flow.skip(params.page * params.pageSize);
+  //   flow.limit(params.pageSize);
+  // }
   return await flow.catch(err => {
     console.log(err);
     throw new Error('error getting users from db');
