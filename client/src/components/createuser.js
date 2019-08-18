@@ -19,7 +19,12 @@ import { FormLabel, InputLabel } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import {
+  KeyboardDatePicker,
+  MuiPickersUtilsProvider
+} from '@material-ui/pickers';
+import 'date-fns';
+import DateFnsUtils from '@date-io/date-fns';
 
 const CreateUser = ({
   setAlert,
@@ -124,8 +129,22 @@ const CreateUser = ({
       justifyContent: 'flex-end'
     },
     button: {
-      marginTop: theme.spacing(3),
-      marginLeft: theme.spacing(1)
+      marginTop: theme.spacing(1),
+      marginLeft: theme.spacing(1),
+      marginBottom: theme.spacing(2)
+    },
+    fillSpace: {
+      width: theme.spacing(15),
+      margin: theme.spacing(1, 1, 1, 1)
+    },
+    badge: {
+      width: theme.spacing(5),
+      // height: '50%'
+      // (top, right, bottom, left)
+      margin: theme.spacing(1, 1, 1, 0)
+    },
+    formName: {
+      marginTop: theme.spacing(1)
     }
   }));
 
@@ -155,7 +174,8 @@ const CreateUser = ({
   };
 
   const [selectedDate, setSelectedDate] = useState(
-    new Date('2014-08-18T21:11:54')
+    // new Date('2014-08-18T21:11:54')
+    new Date(Date.now())
   );
 
   const handleDateChange = date => {
@@ -166,9 +186,35 @@ const CreateUser = ({
     <div>
       <main className={classes.layout}>
         <Paper className={classes.paper}>
-          <Typography variant='h6' gutterBottom>
-            New Soldier
-          </Typography>
+          <div className={classes.buttons}>
+            <img
+              className={classes.badge}
+              src='https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif'
+            />
+            <Typography className={classes.formName} variant='h4' gutterBottom>
+              New Soldier
+            </Typography>
+            <div className={classes.fillSpace} />
+
+            <Button
+              // display='inline'
+              variant='contained'
+              color='success'
+              onClick={handleBack}
+              className={classes.button}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={handleBack}
+              className={classes.button}
+            >
+              Save
+            </Button>
+          </div>
+
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={6}>
               <TextField
@@ -189,7 +235,7 @@ const CreateUser = ({
                 fullWidth
                 autoComplete='name'
               />
-              <FormControl required fullWidth>
+              <FormControl fullWidth>
                 <InputLabel htmlFor='rank-native-helper'>Rank</InputLabel>
                 <Select
                   native
@@ -244,18 +290,20 @@ const CreateUser = ({
                 fullWidth
                 autoComplete='startdate'
               /> */}
-
-              <KeyboardDatePicker
-                margin='normal'
-                id='date-picker-dialog'
-                label='Date picker dialog'
-                format='MM/dd/yyyy'
-                value={selectedDate}
-                onChange={handleDateChange}
-                KeyboardButtonProps={{
-                  'aria-label': 'change date'
-                }}
-              />
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <KeyboardDatePicker
+                  margin='normal'
+                  id='date-picker-dialog'
+                  label='Start Date'
+                  format='MM/dd/yyyy'
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  KeyboardButtonProps={{
+                    'aria-label': 'change date'
+                  }}
+                  fullWidth
+                />
+              </MuiPickersUtilsProvider>
 
               <TextField
                 required
@@ -275,7 +323,7 @@ const CreateUser = ({
                 autoComplete='email'
               />
 
-              <FormControl required fullWidth>
+              <FormControl fullWidth>
                 <InputLabel htmlFor='superior-native-helper'>
                   Superior
                 </InputLabel>
