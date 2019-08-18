@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const UserModel = require('../models/user');
-// const UserService = require('../services/user');
+const UserService = require('../services/user');
 const UserController = require('../controllers/user');
 
 // searchText, sortType, pageSize or limit, pageNumber or page/offset
 // params : mongoose paginate
+// For frontend, ban __NO_SEARCH_TEXT__ input as the invalid input
 
 router.get('/:pageSize/:pageNumber/:sortType/:searchText', async (req, res) => {
   try {
@@ -34,6 +35,24 @@ router.get('/:userId', async (req, res) => {
     });
   } catch (err) {
     res.status(404).json({ error: 'No user found by this id: ' + err });
+  }
+});
+
+// Get Valid superior choices (Loop Check)
+router.get('/loopsafe/:userId', async (req, res) => {
+  try {
+    // res an array
+    const validSuperiors = await UserService.getValidSuperiors(
+      req.params.userId
+    );
+    res.status(200).json({
+      code: 0,
+      data: { validSuperiors }
+    });
+  } catch (err) {
+    res
+      .status(404)
+      .json({ error: 'No valid superiors found by this id: ' + err });
   }
 });
 

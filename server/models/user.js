@@ -48,6 +48,14 @@ UserSchema.plugin(mongoosePaginate);
 
 const User = mongoose.model('user', UserSchema);
 
+const getAllUsers = async () => {
+  let flow = User.find({});
+  return await flow.catch(err => {
+    console.log(err);
+    throw new Error('error getting users from db');
+  });
+};
+
 const getUsers = async params => {
   const { pageSize, pageNumber, sortType, searchText } = params;
   let regex = new RegExp(searchText, 'gim');
@@ -229,6 +237,24 @@ const updateUserSuperior = async (supId, newSupId, newSupName) => {
   });
 };
 
+const getSubordinates = async userId => {
+  try {
+    let rs = await getUserById(userId);
+    let rsArr = rs.directsubordinates;
+    // let rs = await getUserById(userId).directsubordinates;
+    if (rs.directsubordinates.length === 0) return [];
+    for (let i = 0; i < rs.length; i++) {
+      let ds = await getSubordinates(rs[i]);
+      let dsArr = ds.directsubordinates;
+      rsArr = [...rsArr, ...dsArr];
+    }
+    return rsArr;
+  } catch (err) {
+    console.log(err);
+    throw new Error('error geting user subordinates');
+  }
+};
+
 module.exports = {
   model: User,
   getUsers,
@@ -240,5 +266,7 @@ module.exports = {
   deleteUserById,
   transferUserSubordinates,
   updateUserById,
-  updateUserSuperior
+  updateUserSuperior,
+  getAllUsers,
+  getSubordinates
 };

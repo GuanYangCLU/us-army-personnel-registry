@@ -114,6 +114,22 @@ const deleteUserHasSupHasSub = async (
   }
 };
 
+const getValidSuperiors = async userId => {
+  try {
+    const allUsers = await UserModel.getAllUsers();
+    const subordinates = await UserModel.getSubordinates(userId);
+    const subList = subordinates.map(id => id.toString());
+    const invalidList = [...subList, userId];
+    // _id is an object, not a string, use immutable compare
+    return allUsers.filter(
+      user => invalidList.indexOf(user._id.toString()) === -1
+    );
+  } catch (err) {
+    console.log(err);
+    throw new Error('Failed to get valid superior in service: ' + err);
+  }
+};
+
 module.exports = {
   createUserWithoutSuperior,
   createUserWithSuperior,
@@ -124,5 +140,6 @@ module.exports = {
   updateUserNoSupUpdate,
   updateUserNoSupToHasSup,
   updateUserHasSupToNoSup,
-  updateUserHasSupAToHasSupB
+  updateUserHasSupAToHasSupB,
+  getValidSuperiors
 };
