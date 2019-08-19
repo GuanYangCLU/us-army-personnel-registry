@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createUser, initUser } from '../redux/action-creators/users';
 import { setAlert } from '../redux/action-creators/alert';
 import { Loading, Alert } from './utils';
+import axios from 'axios';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -145,6 +146,18 @@ const CreateUser = ({
     },
     formName: {
       marginTop: theme.spacing(1)
+    },
+    avatarHead: {
+      textAlign: 'center'
+    },
+    avatar: {
+      margin: '0 auto',
+      width: theme.spacing(30),
+      height: theme.spacing(30)
+    },
+    uploadButtons: {
+      margin: '0 auto',
+      padding: theme.spacing(0, 0, 0, 1)
     }
   }));
 
@@ -182,6 +195,42 @@ const CreateUser = ({
     setSelectedDate(date);
   };
 
+  const [avatar, setAvatar] = useState(
+    'https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif'
+    // 'http://localhost:5000/uploads/demo.jpg'
+  );
+
+  const [file, setFile] = useState(null);
+
+  const handleSelect = e => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = e => {
+    // setAvatar(e.target.value);
+    console.log(file);
+    const fd = new FormData();
+    fd.append('image', file);
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    };
+    axios
+      .post('http://localhost:5000/upload', fd, config)
+      .then(res => {
+        console.log(res);
+        setAvatar('http://localhost:5000' + res.data.filePath);
+      })
+      .catch(err => console.log(err));
+  };
+
+  const handleSelectRef = () => {
+    uploadEl.current.click();
+  };
+
+  const uploadEl = useRef(null);
+
   return (
     <div>
       <main className={classes.layout}>
@@ -217,14 +266,63 @@ const CreateUser = ({
 
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={6}>
-              <TextField
-                required
-                id='avatar'
-                name='avatar'
-                label='Avatar'
+              <div
+                className={classes.avatarHead}
+                // variant='p'
+                // gutterBottom
                 fullWidth
-                autoComplete='Avatar'
+              >
+                Avatar
+              </div>
+              <br />
+              <div className={classes.avatar}>
+                <img
+                  alt='avatar'
+                  src={avatar}
+                  id='avatar'
+                  name='avatar'
+                  // label='Avatar'
+                  style={{ width: '100%', height: '100%' }}
+                  // fullWidth
+                />
+              </div>
+
+              <input
+                name='avatar'
+                accept='image/*'
+                // className={classes.input}
+                style={{ display: 'none' }}
+                // value={avatar}
+                onChange={handleSelect}
+                ref={uploadEl}
+                // id='raised-button-file'
+                multiple
+                type='file'
               />
+              <div className={classes.uploadButtons}>
+                <div>
+                  <Button
+                    variant='contained'
+                    color='primary'
+                    // component='span'
+                    className={classes.button}
+                    onClick={handleSelectRef}
+                  >
+                    Pick Avatar
+                  </Button>
+                  {/* <label htmlFor='raised-button-file'> */}
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    // component='span'
+                    className={classes.button}
+                    onClick={handleUpload}
+                  >
+                    Upload
+                  </Button>
+                  {/* </label> */}
+                </div>
+              </div>
             </Grid>
             <Grid item xs={12} md={6} lg={6}>
               <TextField

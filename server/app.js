@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 const users = require('./routes/users');
+// const multer = require('multer');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 
@@ -24,8 +26,28 @@ app.use(function(req, res, next) {
 // Routes
 app.use('/api/users', users);
 
-// Static
-app.use(express.static('client/public'));
+// Static ***
+app.use(express.static('./public'));
+
+app.use(fileUpload());
+// Upload Endpoint
+app.post('/upload', (req, res) => {
+  if (req.files === null) {
+    return res.status(400).json({ msg: 'No file uploaded' });
+  }
+  // console.log(req.files);
+  const file = req.files.image;
+  // console.log(file);
+
+  file.mv(`${__dirname}/public/uploads/${file.name}`, err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send(err);
+    }
+
+    res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
+  });
+});
 
 // app.get('*', (req, res) => {
 //   res.sendFile(path.resolve(__dirname, '..', 'client', 'public', 'index.html'));
