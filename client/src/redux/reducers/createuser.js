@@ -1,9 +1,13 @@
 const initState = {
-  firstname: '',
-  lastname: '',
+  avatar: '',
+  name: '',
   sex: '',
-  age: '',
-  password: '',
+  rank: '',
+  startdate: '',
+  phone: '',
+  email: '',
+  superior: '',
+  superiorname: '',
   error: null,
   isLoading: false,
   createSuccess: false

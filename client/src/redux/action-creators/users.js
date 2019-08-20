@@ -164,10 +164,26 @@ export const createUser = userData => dispatch => {
       'Content-Type': 'application/json'
     }
   };
-  axios
-    .post('http://localhost:5000/api/users', userData, config)
-    .then(res => dispatch(createUserSuccess(res.data)))
-    .catch(err => dispatch(createUserError(err)));
+  if (userData.superior) {
+    axios
+      .get(`http://localhost:5000/api/users/${userData.superior}`)
+      .then(res => {
+        // console.log(res.data);
+        // console.log(res.data.data.user.name);
+        userData = { ...userData, superiorname: res.data.data.user.name };
+        axios
+          .post('http://localhost:5000/api/users', userData, config)
+          .then(res => dispatch(createUserSuccess(res.data)))
+          .catch(err => dispatch(createUserError(err)));
+      })
+      .catch(err => dispatch(createUserError(err)));
+  } else {
+    // need clear superior?
+    axios
+      .post('http://localhost:5000/api/users', userData, config)
+      .then(res => dispatch(createUserSuccess(res.data)))
+      .catch(err => dispatch(createUserError(err)));
+  }
 };
 
 export const initUser = () => dispatch => {
@@ -254,11 +270,11 @@ const deleteUserStart = () => {
   };
 };
 
-const deleteUserSuccess = () => {
+const deleteUserSuccess = users => {
   // console.log(userData);
   return {
-    type: 'DELETE_USER_SUCCESS'
-    // payload: userData
+    type: 'DELETE_USER_SUCCESS',
+    payload: users
   };
 };
 
@@ -269,13 +285,26 @@ const deleteUserError = err => {
   };
 };
 
-export const deleteUser = id => dispatch => {
+export const deleteUser = (id, users) => dispatch => {
   dispatch(deleteUserStart());
   axios
     .delete(`http://localhost:5000/api/users/${id}`)
     .then(() => {
-      dispatch(deleteUserSuccess()); //might use if we need deleted id
-      dispatch(setUserList());
+      users = users.filter(user => user._id.toString() !== id.toString());
+      dispatch(deleteUserSuccess(users)); //might use if we need deleted id
+      // Reload this page
+      // How about it is the last row of page?
+      // const index = users.indexOf(user);
+
+      // if (users.length % config.pageSize === 1 && users.length > 1) {
+
+      // }
+      // config = { ...config, pageNumber: config.pageNumber - 1 };
+      // users = users.slice(
+      //   0,
+      //   Math.floor(users.length / config.pageSize) * config.pageSize
+      // );
+      // dispatch(setUserList(config));
     })
     .catch(err => dispatch(deleteUserError(err)));
 };

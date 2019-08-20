@@ -53,9 +53,10 @@ const Home = ({
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
 
   useEffect(() => {
-    // initUser();
+    initUser();
     // initEdit();
     setUserList(config);
+    console.log('again!');
   }, []);
 
   const handleCreate = e => {
@@ -66,8 +67,8 @@ const Home = ({
     history.push(`/edituser/${id}`);
   };
 
-  const handleDelete = id => {
-    deleteUser(id);
+  const handleDelete = (id, users) => {
+    deleteUser(id, users);
   };
 
   const StyledTableCell = withStyles(theme => ({
@@ -236,7 +237,7 @@ const Home = ({
                         <Grid container justify='center' alignItems='center'>
                           <Avatar
                             alt='Remy Sharp'
-                            src='http://localhost:5000/uploads/demo.jpg'
+                            src={user.avatar}
                             className={classes.avatar}
                           />
                           {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.bigAvatar} /> */}
@@ -285,7 +286,7 @@ const Home = ({
                           aria-label='delete'
                           className={classes.fab}
                           onClick={() => {
-                            handleDelete(user._id);
+                            handleDelete(user._id, users);
                           }}
                         >
                           <DeleteIcon />
@@ -357,7 +358,7 @@ const mapStateToDispatch = dispatch => {
     setUserList: config => dispatch(setUserList(config)),
     initUser: () => dispatch(initUser()),
     initEdit: () => dispatch(initEdit()),
-    deleteUser: id => dispatch(deleteUser(id)),
+    deleteUser: (id, users) => dispatch(deleteUser(id, users)),
     loadNextPage: (config, users) => dispatch(loadNextPage(config, users)),
     resetConfig: () => dispatch(resetConfig())
   };
