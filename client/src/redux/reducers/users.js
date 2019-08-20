@@ -1,4 +1,22 @@
 const initState = {
+  config: {
+    pageSize: 3,
+    pageNumber: 1,
+    sortType: 0,
+    searchText: '__NO_SEARCH_TEXT__',
+    superiorId: '__NO_SUPERIOR_ID__'
+  },
+  // pageInfo: {
+  //   hasPrevPage: false,
+  //   hasNextPage: true,
+  //   prevPage: null,
+  //   nextPage: 2
+  // },
+  // pageInfo: {
+  //   totalDocs: 10,
+  //   totalPages: 4,
+  //   // pagingCounter: 1,
+  // },
   users: [],
   error: null,
   deleteError: null,
@@ -11,7 +29,24 @@ const users = (state = initState, action) => {
     case 'SET_USER_LIST_START':
       return { ...state, isLoading: true };
     case 'SET_USER_LIST_SUCCESS':
-      return { ...state, ...payload, isLoading: false };
+      // console.log(payload.users.length, ' == ', payload.config.pageSize);
+      // if (
+      //   payload.users.length / payload.config.pageSize ===
+      //   payload.config.pageNumber
+      // ) {
+      state.config.pageNumber++;
+      return {
+        ...state,
+        ...payload,
+        // config: { pageNumber },
+        isLoading: false
+      };
+    // } else {
+    //   return {
+    //     ...state,
+    //     isLoading: false
+    //   };
+    // }
     case 'SET_USER_LIST_ERROR':
       return { ...state, ...payload, isLoading: false };
     case 'DELETE_USER_START':

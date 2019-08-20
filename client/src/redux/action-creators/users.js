@@ -7,12 +7,22 @@ const setUserListStart = () => {
   };
 };
 
-const setUserListSuccess = data => {
-  // data: Array of user obj
-  //   console.log(data[0]);
+const setUserListSuccess = (data, config) => {
+  // if (config !== null) {
+  //   console.log('IAM CONF: ', config);
+  //   return {
+  //     type: 'SET_USER_LIST_SUCCESS',
+  //     payload: { users: data, pageInfo, config }
+  //   };
+  // } else {
+  //   return {
+  //     type: 'SET_USER_LIST_SUCCESS',
+  //     payload: { users: data, pageInfo }
+  //   };
+  // }
   return {
     type: 'SET_USER_LIST_SUCCESS',
-    payload: { users: data }
+    payload: { users: data, config }
   };
 };
 
@@ -23,11 +33,103 @@ const setUserListError = err => {
   };
 };
 
-export const setUserList = () => dispatch => {
+const noMoreUsers = () => {
+  return {
+    type: 'NO_MORE_USERS',
+    payload: { alertContent: 'No more soldiers!' }
+  };
+};
+
+export const setUserList = config => dispatch => {
   dispatch(setUserListStart());
+  const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
+  // console.log(config);
+  // console.log(pageNumber, searchText);
   axios
-    .get('http://localhost:5000/api/users')
-    .then(res => dispatch(setUserListSuccess(res.data)))
+    .get(
+      `http://localhost:5000/api/users/${pageSize}/${pageNumber}/${sortType}/${searchText}/${superiorId}`
+    )
+    .then(res => {
+      // console.log('success', res.data.docs);
+      // const pageInfo = {
+      //   hasPrevPage: res.data.hasPrevPage,
+      //   hasNextPage: res.data.hasNextPage,
+      //   prevPage: res.data.prevPage,
+      //   nextPage: res.data.nextPage
+      // };
+      dispatch(setUserListSuccess(res.data.docs, config));
+    })
+    .catch(err => dispatch(setUserListError(err)));
+};
+
+export const loadNextPage = (config, users) => dispatch => {
+  // if (payload.users.length / payload.config.pageSize < payload.config.pageNumber - 1) {
+  //   dispatch(fixPageNumber);
+  //   return
+  // }
+  dispatch(setUserListStart());
+  const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
+  console.log(config);
+  axios
+    .get(
+      `http://localhost:5000/api/users/${pageSize}/${pageNumber}/${sortType}/${searchText}/${superiorId}`
+    )
+    .then(res => {
+      // console.log('success', res.data.docs);
+      // const pageInfo = {
+      //   hasPrevPage: res.data.hasPrevPage,
+      //   hasNextPage: res.data.hasNextPage,
+      //   prevPage: res.data.prevPage,
+      //   nextPage: res.data.nextPage
+      // };
+
+      // if (!res.data.hasNextPage) {
+      //   // dispatch(noMoreUsers());
+      //   throw new Error('No more soldiers');
+      // } else {
+      setTimeout(() => {
+        dispatch(setUserListSuccess(users.concat(res.data.docs), config));
+        // setUsers(fakeD);
+      }, 1500);
+      // }
+    })
+    .catch(err => dispatch(setUserListError(err)));
+};
+
+export const resetConfig = () => dispatch => {
+  dispatch(setUserListStart());
+  // Initialize Config
+  const config = {
+    pageSize: 3,
+    pageNumber: 1,
+    sortType: 0,
+    searchText: '__NO_SEARCH_TEXT__',
+    superiorId: '__NO_SUPERIOR_ID__'
+  };
+  // console.log(config);
+  // console.log(pageNumber, searchText);
+  axios
+    .get(
+      `http://localhost:5000/api/users/${config.pageSize}/${
+        config.pageNumber
+      }/${config.sortType}/${config.searchText}/${config.superiorId}`
+    )
+    .then(res => {
+      console.log('WWsuccess', res.data.docs);
+      console.log('WOW: ', config);
+      // config = {
+      //   ...config,
+      //   pageNumber: 2
+      // };
+      // const pageInfo = {
+      //   hasPrevPage: false,
+      //   hasNextPage: true,
+      //   prevPage: null,
+      //   nextPage: 2
+      // };
+      config.pageNumber++;
+      dispatch(setUserListSuccess(res.data.docs, config));
+    })
     .catch(err => dispatch(setUserListError(err)));
 };
 

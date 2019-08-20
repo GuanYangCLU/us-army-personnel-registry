@@ -9,6 +9,8 @@ const alert = (state = initState, action) => {
       return { ...state, ...payload };
     case 'CLEAR_ALERT':
       return { ...state, ...payload };
+    case 'NO_MORE_USERS':
+      return { ...state, ...payload };
     default:
       return state;
   }

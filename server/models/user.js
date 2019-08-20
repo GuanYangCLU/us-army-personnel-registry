@@ -57,9 +57,9 @@ const getAllUsers = async () => {
 };
 
 const getUsers = async params => {
-  const { pageSize, pageNumber, sortType, searchText } = params;
+  const { pageSize, pageNumber, sortType, searchText, superiorId } = params;
   let regex = new RegExp(searchText, 'gim');
-  const query = {
+  let query = {
     $or: [
       { name: regex },
       { rank: regex },
@@ -70,6 +70,13 @@ const getUsers = async params => {
       { superiorname: regex }
     ]
   };
+  if (superiorId) {
+    query = {
+      ...query,
+      $and: [{ superior: superiorId }]
+    };
+  }
+
   const sortOrder = [
     {}, // 0
     { name: 1 }, // 1

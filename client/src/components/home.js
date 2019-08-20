@@ -1,10 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { setUserList } from '../redux/action-creators/users';
+import {
+  setUserList,
+  loadNextPage,
+  resetConfig
+} from '../redux/action-creators/users';
 import { connect } from 'react-redux';
 import { initUser, initEdit, deleteUser } from '../redux/action-creators/users';
 import { Loading, Alert } from './utils';
-import Pagination from './pagination';
-import Table from './table';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import axios from 'axios';
+
+// import MaterialTable from 'material-table';
+import { fade, withStyles, makeStyles } from '@material-ui/core/styles';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import InputBase from '@material-ui/core/InputBase';
+import MenuIcon from '@material-ui/icons/Menu';
+import SearchIcon from '@material-ui/icons/Search';
+import Avatar from '@material-ui/core/Avatar';
+import Grid from '@material-ui/core/Grid';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import Icon from '@material-ui/core/Icon';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const Home = ({
   users,
@@ -13,51 +42,24 @@ const Home = ({
   initUser,
   initEdit,
   deleteUser,
+  loadNextPage,
   isLoading,
+  config,
+  resetConfig,
   error,
-  deleteError
+  deleteError,
+  alertContent
 }) => {
+  const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
+
   useEffect(() => {
-    initUser();
-    initEdit();
-    setUserList();
-  }, []); //initUser, initEdit, setUserList
-
-  const maxRowsPerPage = 10; // set max rows per page
-
-  // state part ******
-  const [query, setQuery] = useState(''); // search input
-  const [goToPage, setGoToPage] = useState(''); // goto input
-
-  const [actAttr, setActAttr] = useState(''); // sort by which attribute
-  const [sortType, setSortType] = useState(0); // default/asc/desc
-  const [queryCur, setQueryCur] = useState(''); // store the query for search
-
-  const [activePage, setActivePage] = useState(1); // current page
-
-  // sortType: 1 for ascend, 2 for descend, 0 for default
-  // if need remember page back, try redux
-
-  // function define part *****
-
-  // handle functions, process logic and actions
-  const handleChange = e => {
-    if (e.target.id === 'search') {
-      setQuery(e.target.value);
-    } else if (e.target.id === 'goto') {
-      setGoToPage(e.target.value);
-    }
-  };
+    // initUser();
+    // initEdit();
+    setUserList(config);
+  }, []);
 
   const handleCreate = e => {
     history.push('/createuser');
-  };
-
-  const handleSearch = e => {
-    e.preventDefault();
-    // protect out of page
-    setActivePage(1);
-    setQueryCur(query);
   };
 
   const handleEdit = id => {
@@ -66,266 +68,272 @@ const Home = ({
 
   const handleDelete = id => {
     deleteUser(id);
-    // setDeleteId(id);
   };
 
-  const handlePageGoTo = e => {
-    // console.log(e.target.tagName); // FORM
-    e.preventDefault();
-    if (
-      !isNaN(goToPage) &&
-      goToPage >= 1 &&
-      goToPage <=
-        parseInt(
-          (activeUser(queryCur, sortType, users, actAttr).length - 1) /
-            maxRowsPerPage
-        ) +
-          1
-    )
-      setActivePage(parseInt(goToPage)); // prevent invalid input
-    // in case decimal: 1.2, 2.6, ...
-  };
-
-  const handleSort = e => {
-    if (e.target.id === actAttr) {
-      setSortType((sortType + 1) % 3);
-    } else {
-      setSortType(1);
+  const StyledTableCell = withStyles(theme => ({
+    head: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white
+    },
+    body: {
+      fontSize: 14
     }
-    // Clear the sort type from another attribute
-    setActAttr(e.target.id);
-  };
+  }))(TableCell);
 
-  // -------------------------------------------------------
-  // child function for selectUser, sort logic
-  const sortUserByAttr = (users, attribute) => {
-    // Don't change the USERS array!
-    // ignore Upper and Lower differences, sex can be F/M or whole word
-    switch (attribute) {
-      case 'firstname':
-        return [...users].sort((a, b) =>
-          a.firstname.toLowerCase() > b.firstname.toLowerCase()
-            ? 1
-            : a.firstname.toLowerCase() === b.firstname.toLowerCase()
-            ? a.lastname.toLowerCase() > b.lastname.toLowerCase()
-              ? 1
-              : a.lastname.toLowerCase() === b.lastname.toLowerCase()
-              ? a.age > b.age
-                ? 1
-                : a.age === b.age
-                ? a.sex.toLowerCase().slice(0, 1) >
-                  b.sex.toLowerCase().slice(0, 1)
-                  ? 1
-                  : -1
-                : -1
-              : -1
-            : -1
-        );
-
-      case 'lastname':
-        return [...users].sort((a, b) =>
-          a.lastname.toLowerCase() > b.lastname.toLowerCase()
-            ? 1
-            : a.lastname.toLowerCase() === b.lastname.toLowerCase()
-            ? a.firstname.toLowerCase() > b.firstname.toLowerCase()
-              ? 1
-              : a.firstname.toLowerCase() === b.firstname.toLowerCase()
-              ? a.age > b.age
-                ? 1
-                : a.age === b.age
-                ? a.sex.toLowerCase().slice(0, 1) >
-                  b.sex.toLowerCase().slice(0, 1)
-                  ? 1
-                  : -1
-                : -1
-              : -1
-            : -1
-        );
-
-      case 'sex':
-        return [...users].sort((a, b) =>
-          a.sex.toLowerCase().slice(0, 1) > b.sex.toLowerCase().slice(0, 1)
-            ? 1
-            : a.sex.toLowerCase().slice(0, 1) ===
-              b.sex.toLowerCase().slice(0, 1)
-            ? a.firstname.toLowerCase() > b.firstname.toLowerCase()
-              ? 1
-              : a.firstname.toLowerCase() === b.firstname.toLowerCase()
-              ? a.lastname.toLowerCase() > b.lastname.toLowerCase()
-                ? 1
-                : a.lastname.toLowerCase() === b.lastname.toLowerCase()
-                ? a.age > b.age
-                  ? 1
-                  : -1
-                : -1
-              : -1
-            : -1
-        );
-
-      case 'age':
-        // console.log([...users][0].age);
-        return [...users].sort((a, b) =>
-          a.age > b.age
-            ? 1
-            : a.age === b.age
-            ? a.firstname.toLowerCase() > b.firstname.toLowerCase()
-              ? 1
-              : a.firstname.toLowerCase() === b.firstname.toLowerCase()
-              ? a.lastname.toLowerCase() > b.lastname.toLowerCase()
-                ? 1
-                : a.lastname.toLowerCase() === b.lastname.toLowerCase()
-                ? a.sex.toLowerCase().slice(0, 1) >
-                  b.sex.toLowerCase().slice(0, 1)
-                  ? 1
-                  : -1
-                : -1
-              : -1
-            : -1
-        );
-
-      default:
-        return [...users];
+  const StyledTableRow = withStyles(theme => ({
+    root: {
+      '&:nth-of-type(odd)': {
+        backgroundColor: theme.palette.background.default
+      }
     }
-  };
+  }))(TableRow);
 
-  // @ searchUser, selectUser are child functions for setActiveUser
-  const searchUser = (users, queryCur) => {
-    // this func filter users based on search query
-    return users.filter(
-      user =>
-        user.firstname
-          .toLowerCase()
-          .indexOf(queryCur.toString().toLowerCase()) !== -1 ||
-        user.lastname
-          .toLowerCase()
-          .indexOf(queryCur.toString().toLowerCase()) !== -1 ||
-        user.sex.toLowerCase().indexOf(queryCur.toString().toLowerCase()) !==
-          -1 ||
-        user.age.toString().indexOf(queryCur.toString()) !== -1
-    );
-  };
-
-  const selectSort = (sortType, users, actAttr) => {
-    // this func sort users based on sort type
-    switch (sortType) {
-      case 1:
-        return sortUserByAttr(users, actAttr);
-      case 2:
-        return [...sortUserByAttr(users, actAttr)].reverse();
-      default:
-        return users;
+  const useStyles = makeStyles(theme => ({
+    root: {
+      width: '100%',
+      marginTop: theme.spacing(3),
+      overflowX: 'auto'
+    },
+    table: {
+      minWidth: 700
+    },
+    menuButton: {
+      marginRight: theme.spacing(2)
+    },
+    title: {
+      flexGrow: 1,
+      display: 'none',
+      [theme.breakpoints.up('sm')]: {
+        display: 'block'
+      }
+    },
+    search: {
+      position: 'relative',
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: fade(theme.palette.common.white, 0.15),
+      '&:hover': {
+        backgroundColor: fade(theme.palette.common.white, 0.25)
+      },
+      marginLeft: 0,
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        marginLeft: theme.spacing(1),
+        width: 'auto'
+      }
+    },
+    searchIcon: {
+      width: theme.spacing(7),
+      height: '100%',
+      position: 'absolute',
+      pointerEvents: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    inputRoot: {
+      color: 'inherit'
+    },
+    inputInput: {
+      padding: theme.spacing(1, 1, 1, 7),
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        width: 120,
+        '&:focus': {
+          width: 200
+        }
+      }
+    },
+    avatar: {
+      margin: 10
+    },
+    bigAvatar: {
+      margin: 10,
+      width: 60,
+      height: 60
+    },
+    fab: {
+      margin: theme.spacing(1)
+    },
+    extendedIcon: {
+      marginRight: theme.spacing(1)
     }
-  };
+  }));
 
-  // IMPORTANT function to calculate active users
-  const activeUser = (queryCur, sortType, users, actAttr) => {
-    // this func return results after search and then sorting
-    if (queryCur) {
-      const searchedUsers = searchUser(users, queryCur);
-      return selectSort(sortType, searchedUsers, actAttr);
-    } else {
-      return selectSort(sortType, users, actAttr);
-    }
-  };
-  // old expression:
-  // (queryCur
-  //   ? (sortType === 1
-  //       ? sortUserByAttr(users, actAttr)
-  //       : sortType === 2
-  //       ? [...sortUserByAttr(users, actAttr).reverse()]
-  //       : users
-  //     ).filter(user => searchUser(user, queryCur))
-  //   : sortType === 1
-  //   ? sortUserByAttr(users, actAttr)
-  //   : sortType === 2
-  //   ? [...sortUserByAttr(users, actAttr).reverse()]
-  //   : users
-  // )
-  // ------------------------------------------------------------
-
-  //render part ********
-  if (
-    activeUser(queryCur, sortType, users, actAttr).length > 0 &&
-    activeUser(queryCur, sortType, users, actAttr).length ===
-      (activePage - 1) * maxRowsPerPage
-  ) {
-    // if it is this page's last user, after delete, back to prev page
-    // empty list stay in 1st page
-    setActivePage(activePage - 1);
-  }
+  const classes = useStyles();
 
   return (
-    <div>
-      <nav className='navbar navbar-light bg-light'>
-        <label className='navbar-brand'>User List</label>
-
-        <form className='form-inline' onSubmit={e => handlePageGoTo(e)}>
-          Go to page:{' '}
-          <input
-            className='form-control mr-sm-2'
-            type='goto'
-            placeholder='Go to page'
-            aria-label='GoTo'
-            id='goto'
-            value={goToPage}
-            onChange={e => handleChange(e)}
-          />
-        </form>
-
-        <form className='form-inline' onSubmit={e => handleSearch(e)}>
-          Search:{' '}
-          <input
-            className='form-control mr-sm-2'
-            type='search'
-            placeholder='Search'
-            aria-label='Search'
-            id='search'
-            value={query}
-            onChange={e => handleChange(e)}
-          />
-          {/* <input type='submit' value='Search' /> */}
-        </form>
-
-        {/* <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> */}
-
-        <button
-          className='btn btn-outline-success'
-          onClick={e => handleCreate()}
-        >
-          <i className='fas fa-user' /> Create
-        </button>
-      </nav>
+    <div className={classes.root}>
+      <AppBar position='static'>
+        <Toolbar>
+          {/* <IconButton
+            edge='start'
+            className={classes.menuButton}
+            color='inherit'
+            aria-label='open drawer'
+          >
+            <MenuIcon />
+          </IconButton> */}
+          <Typography className={classes.title} variant='h6' noWrap>
+            US Army Personnel Registration
+          </Typography>
+          <div className={classes.search}>
+            <div className={classes.searchIcon}>
+              <SearchIcon />
+            </div>
+            <InputBase
+              placeholder='Search…'
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput
+              }}
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </div>
+          <Button
+            // variant='contained'
+            color='inherit'
+            onClick={resetConfig}
+          >
+            Reset
+          </Button>
+          <Fab
+            color='secondary'
+            aria-label='add'
+            className={classes.fab}
+            onClick={e => handleCreate()}
+          >
+            <AddIcon />
+          </Fab>
+        </Toolbar>
+      </AppBar>
       <div>
         {isLoading ? (
           <Loading />
         ) : (
           <div>
-            <Table
-              queryCur={queryCur}
-              sortType={sortType}
-              users={users}
-              actAttr={actAttr}
-              maxRowsPerPage={maxRowsPerPage}
-              activeUser={activeUser}
-              activePage={activePage}
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-              handleSort={handleSort}
-            />
+            <Paper className={classes.root}>
+              <Table className={classes.table} size='small'>
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell>Avatar</StyledTableCell>
+                    <StyledTableCell align='right'>Name</StyledTableCell>
+                    <StyledTableCell align='right'>Sex</StyledTableCell>
+                    <StyledTableCell align='right'>Rank</StyledTableCell>
+                    <StyledTableCell align='right'>Start Date</StyledTableCell>
+                    <StyledTableCell align='right'>Phone</StyledTableCell>
+                    <StyledTableCell align='right'>Email</StyledTableCell>
+                    <StyledTableCell align='right'>Superior</StyledTableCell>
+                    <StyledTableCell align='right'># of D.S.</StyledTableCell>
+                    <StyledTableCell align='center'>Edit</StyledTableCell>
+                    <StyledTableCell align='center'>Delete</StyledTableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {users.map(user => (
+                    <StyledTableRow key={user._id}>
+                      <StyledTableCell component='th' scope='row'>
+                        <Grid container justify='center' alignItems='center'>
+                          <Avatar
+                            alt='Remy Sharp'
+                            src='http://localhost:5000/uploads/demo.jpg'
+                            className={classes.avatar}
+                          />
+                          {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.bigAvatar} /> */}
+                        </Grid>
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {user.name}
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {user.sex}
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {user.rank}
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {user.startdate.slice(0, 10)}
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        <a href={'tel: ' + user.phone}>{user.phone}</a>
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        <a href={'mailto: ' + user.email}>{user.email}</a>
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {user.superiorname}
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {user.directsubordinates.length}
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        <Fab
+                          color='secondary'
+                          aria-label='edit'
+                          className={classes.fab}
+                          onClick={() => {
+                            handleEdit(user._id);
+                          }}
+                        >
+                          {/* <Icon>edit_icon</Icon> */}
+                          <EditIcon />
+                        </Fab>
+                      </StyledTableCell>
+                      <StyledTableCell align='right'>
+                        <Fab
+                          // disabled
+                          aria-label='delete'
+                          className={classes.fab}
+                          onClick={() => {
+                            handleDelete(user._id);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </Fab>
+                      </StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Paper>
 
-            {/* Pagination Bar */}
-            <Pagination
-              queryCur={queryCur}
-              sortType={sortType}
-              users={users}
-              actAttr={actAttr}
-              maxRowsPerPage={maxRowsPerPage}
-              activeUser={activeUser}
-              activePage={activePage}
-              setActivePage={setActivePage}
-            />
-            {error && <Alert waring='server' item='get' />}
-            {deleteError && <Alert waring='server' item='delete' />}
+            {error && <h4>No more soldiers</h4>}
+
+            <InfiniteScroll
+              dataLength={users.length}
+              next={() => {
+                loadNextPage(config, users);
+              }}
+              hasMore={users.length / pageSize === pageNumber - 1}
+              loader={<h4>Loading...</h4>}
+              endMessage={
+                <p style={{ textAlign: 'center' }}>
+                  <b>Yay! You have seen it all</b>
+                </p>
+              }
+              // refreshFunction={this.refresh}
+              // pullDownToRefresh
+              // pullDownToRefreshContent={
+              //   <h3 style={{ textAlign: 'center' }}>
+              //     &#8595; Pull down to refresh
+              //   </h3>
+              // }
+              // releaseToRefreshContent={
+              //   <h3 style={{ textAlign: 'center' }}>
+              //     &#8593; Release to refresh
+              //   </h3>
+              // }
+            >
+              <div style={{ color: 'white' }}>
+                {users.map(user => {
+                  return (
+                    <li>
+                      <h1>{user.name}</h1>
+                    </li>
+                  );
+                })}
+              </div>
+            </InfiniteScroll>
           </div>
         )}
       </div>
@@ -338,16 +346,20 @@ const mapStateToProps = state => {
     users: state.users.users,
     isLoading: state.users.isLoading,
     error: state.users.error,
-    deleteError: state.users.deleteError
+    deleteError: state.users.deleteError,
+    config: state.users.config,
+    alertContent: state.alert.alertContent
   };
 };
 
 const mapStateToDispatch = dispatch => {
   return {
-    setUserList: () => dispatch(setUserList()),
+    setUserList: config => dispatch(setUserList(config)),
     initUser: () => dispatch(initUser()),
     initEdit: () => dispatch(initEdit()),
-    deleteUser: id => dispatch(deleteUser(id))
+    deleteUser: id => dispatch(deleteUser(id)),
+    loadNextPage: (config, users) => dispatch(loadNextPage(config, users)),
+    resetConfig: () => dispatch(resetConfig())
   };
 };
 

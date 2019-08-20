@@ -8,23 +8,30 @@ const UserController = require('../controllers/user');
 // params : mongoose paginate
 // For frontend, ban __NO_SEARCH_TEXT__ input as the invalid input
 
-router.get('/:pageSize/:pageNumber/:sortType/:searchText', async (req, res) => {
-  try {
-    if (req.params.searchText === '__NO_SEARCH_TEXT__') {
-      req.params.searchText = '';
+router.get(
+  '/:pageSize/:pageNumber/:sortType/:searchText/:superiorId',
+  async (req, res) => {
+    try {
+      if (req.params.searchText === '__NO_SEARCH_TEXT__') {
+        req.params.searchText = '';
+      }
+      if (req.params.superiorId === '__NO_SUPERIOR_ID__') {
+        req.params.superiorId = null;
+      }
+      const query = {
+        pageSize: req.params.pageSize,
+        pageNumber: req.params.pageNumber,
+        sortType: req.params.sortType,
+        searchText: req.params.searchText,
+        superiorId: req.params.superiorId
+      };
+      const users = await UserModel.getUsers(query);
+      res.status(200).json(users);
+    } catch (err) {
+      res.status(404).json({ error: 'No user found: ' + err });
     }
-    const query = {
-      pageSize: req.params.pageSize,
-      pageNumber: req.params.pageNumber,
-      sortType: req.params.sortType,
-      searchText: req.params.searchText
-    };
-    const users = await UserModel.getUsers(query);
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(404).json({ error: 'No user found: ' + err });
   }
-});
+);
 
 router.get('/:userId', async (req, res) => {
   try {
