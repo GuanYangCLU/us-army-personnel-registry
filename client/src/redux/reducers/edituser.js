@@ -1,9 +1,4 @@
 const initState = {
-  firstname: '',
-  lastname: '',
-  sex: '',
-  age: '',
-  password: '',
   error: null,
   isLoading: false,
   editSuccess: false
@@ -17,7 +12,6 @@ const editUser = (state = initState, action) => {
     case 'EDIT_USER_SUCCESS':
       return {
         ...state,
-        ...payload,
         isLoading: false,
         editSuccess: true,
         error: null

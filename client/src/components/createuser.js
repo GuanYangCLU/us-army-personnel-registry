@@ -56,7 +56,8 @@ const CreateUser = ({
   );
 
   const [userData, setUserData] = useState({
-    // avatar: 'https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif',
+    avatar:
+      'https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif',
     name: '',
     sex: '',
     rank: '',
@@ -67,7 +68,7 @@ const CreateUser = ({
   });
 
   const {
-    // avatar,
+    avatar,
     name,
     sex,
     rank,
@@ -105,10 +106,10 @@ const CreateUser = ({
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  const [avatar, setAvatar] = useState(
-    'https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif'
-    // 'http://localhost:5000/uploads/demo.jpg'
-  );
+  // const [avatar, setAvatar] = useState(
+  //   'https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif'
+  //   // 'http://localhost:5000/uploads/demo.jpg'
+  // );
 
   const handleBack = () => {
     history.push('/');
@@ -134,7 +135,10 @@ const CreateUser = ({
       .post('http://localhost:5000/upload', fd, config)
       .then(res => {
         console.log(res);
-        setAvatar('http://localhost:5000' + res.data.filePath);
+        setUserData({
+          ...userData,
+          avatar: `http://localhost:5000/${res.data.filePath}`
+        });
       })
       .catch(err => console.log(err));
   };

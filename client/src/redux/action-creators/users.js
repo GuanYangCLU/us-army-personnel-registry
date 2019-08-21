@@ -40,6 +40,13 @@ const noMoreUsers = () => {
   };
 };
 
+const setSuperiorListSuccess = users => {
+  return {
+    type: 'SET_SUPERIOR_LIST_SUCCESS',
+    payload: users
+  };
+};
+
 export const setUserList = config => dispatch => {
   dispatch(setUserListStart());
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
@@ -69,7 +76,7 @@ export const loadNextPage = (config, users) => dispatch => {
   // }
   dispatch(setUserListStart());
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
-  console.log(config);
+  // console.log(config);
   axios
     .get(
       `http://localhost:5000/api/users/${pageSize}/${pageNumber}/${sortType}/${searchText}/${superiorId}`
@@ -115,8 +122,8 @@ export const resetConfig = () => dispatch => {
       }/${config.sortType}/${config.searchText}/${config.superiorId}`
     )
     .then(res => {
-      console.log('WWsuccess', res.data.docs);
-      console.log('WOW: ', config);
+      // console.log('WWsuccess', res.data.docs);
+      // console.log('WOW: ', config);
       // config = {
       //   ...config,
       //   pageNumber: 2
@@ -133,6 +140,17 @@ export const resetConfig = () => dispatch => {
     .catch(err => dispatch(setUserListError(err)));
 };
 
+export const setSuperiorList = id => dispatch => {
+  dispatch(setUserListStart());
+  axios
+    .get(`http://localhost:5000/api/users/loopsafe/${id}`)
+    .then(res => {
+      console.log(res.data);
+      dispatch(setSuperiorListSuccess(res.data.data.validSuperiors));
+    })
+    .catch(err => dispatch(setUserListError(err)));
+};
+
 // --------------
 
 const createUserStart = () => {
@@ -142,11 +160,11 @@ const createUserStart = () => {
   };
 };
 
-const createUserSuccess = userData => {
+const createUserSuccess = () => {
   // data: user obj: {fn, ln, sex, age, pw}
   return {
-    type: 'CREATE_USER_SUCCESS',
-    payload: userData
+    type: 'CREATE_USER_SUCCESS'
+    // payload: userData
   };
 };
 
@@ -173,7 +191,7 @@ export const createUser = userData => dispatch => {
         userData = { ...userData, superiorname: res.data.data.user.name };
         axios
           .post('http://localhost:5000/api/users', userData, config)
-          .then(res => dispatch(createUserSuccess(res.data)))
+          .then(res => dispatch(createUserSuccess())) // res.data
           .catch(err => dispatch(createUserError(err)));
       })
       .catch(err => dispatch(createUserError(err)));
@@ -181,7 +199,7 @@ export const createUser = userData => dispatch => {
     // need clear superior?
     axios
       .post('http://localhost:5000/api/users', userData, config)
-      .then(res => dispatch(createUserSuccess(res.data)))
+      .then(res => dispatch(createUserSuccess())) // res.data
       .catch(err => dispatch(createUserError(err)));
   }
 };
@@ -210,11 +228,11 @@ const editUserStart = () => {
   };
 };
 
-const editUserSuccess = userData => {
+const editUserSuccess = () => {
   // data: user obj: {fn, ln, sex, age, pw}
   return {
-    type: 'EDIT_USER_SUCCESS',
-    payload: userData
+    type: 'EDIT_USER_SUCCESS'
+    // payload: userData
   };
 };
 
@@ -225,22 +243,44 @@ const editUserError = err => {
   };
 };
 
-export const editUser = (userData, history, initEdit) => dispatch => {
+export const editUser = (id, userData, initEdit) => dispatch => {
   dispatch(editUserStart());
   const config = {
     headers: {
       'Content-Type': 'application/json'
     }
   };
-  axios
-    .put(`http://localhost:5000/api/users/${userData.id}`, userData, config)
-    .then(res => {
-      dispatch(editUserSuccess(res.data));
-      // other method:
-      history.push('/');
-      initEdit();
-    })
-    .catch(err => dispatch(editUserError(err)));
+
+  if (userData.superior) {
+    axios
+      .get(`http://localhost:5000/api/users/${userData.superior}`)
+      .then(res => {
+        // console.log(res.data);
+        // console.log(res.data.data.user.name);
+        userData = { ...userData, superiorname: res.data.data.user.name };
+        axios
+          .put(`http://localhost:5000/api/users/${id}`, userData, config)
+          .then(res => {
+            dispatch(editUserSuccess()); // res.data
+            // other method:
+            // history.push('/');
+            initEdit();
+          })
+          .catch(err => dispatch(editUserError(err)));
+      })
+      .catch(err => dispatch(editUserError(err)));
+  } else {
+    userData = { ...userData, superiorname: '' };
+    axios
+      .put(`http://localhost:5000/api/users/${id}`, userData, config)
+      .then(res => {
+        dispatch(editUserSuccess()); // res.data
+        // other method:
+        // history.push('/');
+        initEdit();
+      })
+      .catch(err => dispatch(editUserError(err)));
+  }
 };
 
 // -------
@@ -250,11 +290,15 @@ export const initEdit = () => dispatch => {
   dispatch({
     type: 'INIT_EDIT',
     payload: {
-      firstname: '',
-      lastname: '',
+      avatar:
+        'https://s.yimg.com/aah/priorservice/us-army-new-logo-magnet-15.gif',
+      name: '',
       sex: '',
-      age: '',
-      password: '',
+      rank: '',
+      startdate: '',
+      phone: '',
+      email: '',
+      superior: '',
       editSuccess: false,
       error: null
     }
@@ -338,10 +382,46 @@ export const getUser = (id, setUserData) => dispatch => {
   axios
     .get(`http://localhost:5000/api/users/${id}`)
     .then(res => {
-      const { firstname, lastname, sex, age } = res.data;
-      const userData = { firstname, lastname, sex, age };
+      console.log(res.data);
+      const {
+        avatar,
+        name,
+        sex,
+        rank,
+        startdate,
+        phone,
+        email,
+        superior,
+        superiorname
+      } = res.data.data.user;
+      const userData = {
+        avatar,
+        name,
+        sex,
+        rank,
+        startdate,
+        phone,
+        email,
+        superior: superior ? superior : '',
+        superiorname: superiorname ? superiorname : ''
+      };
       dispatch(getUserSuccess(userData));
       setUserData(userData);
     })
     .catch(err => dispatch(getUserError(err)));
+};
+
+export const changeSortType = typ => dispatch => {
+  dispatch({
+    type: 'CHANGE_SORT_TYPE',
+    payload: { sortType: typ }
+  });
+};
+
+export const changeSearchText = query => dispatch => {
+  if (!query) query = '__NO_SEARCH_TEXT__';
+  dispatch({
+    type: 'CHANGE_SEARCH_TEXT',
+    payload: { searchText: query }
+  });
 };

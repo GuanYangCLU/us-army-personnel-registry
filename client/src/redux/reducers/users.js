@@ -21,6 +21,7 @@ const initState = {
   error: null,
   deleteError: null,
   isLoading: false
+  // lock: true
 };
 
 const users = (state = initState, action) => {
@@ -40,6 +41,7 @@ const users = (state = initState, action) => {
         ...payload,
         // config: { pageNumber },
         isLoading: false
+        // lock: false
       };
     // } else {
     //   return {
@@ -62,7 +64,20 @@ const users = (state = initState, action) => {
         // deleteId: payload._id,
         isLoading: false
       };
-
+    case 'SET_SUPERIOR_LIST_SUCCESS':
+      return {
+        ...state,
+        users: payload,
+        isLoading: false
+      };
+    case 'CHANGE_SORT_TYPE':
+      state.config.sortType = payload.sortType;
+      state.config.pageNumber = 1;
+      return state;
+    case 'CHANGE_SEARCH_TEXT':
+      state.config.searchText = payload.searchText;
+      state.config.pageNumber = 1;
+      return state;
     default:
       return state;
   }

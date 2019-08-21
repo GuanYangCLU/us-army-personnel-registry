@@ -5,7 +5,13 @@ import {
   resetConfig
 } from '../redux/action-creators/users';
 import { connect } from 'react-redux';
-import { initUser, initEdit, deleteUser } from '../redux/action-creators/users';
+import {
+  initUser,
+  initEdit,
+  deleteUser,
+  changeSortType,
+  changeSearchText
+} from '../redux/action-creators/users';
 import { Loading, Alert } from './utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import axios from 'axios';
@@ -34,6 +40,8 @@ import AddIcon from '@material-ui/icons/Add';
 import Icon from '@material-ui/core/Icon';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 const Home = ({
   users,
@@ -48,15 +56,24 @@ const Home = ({
   resetConfig,
   error,
   deleteError,
-  alertContent
+  alertContent,
+  changeSortType,
+  changeSearchText
+  // lock
 }) => {
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
+  const [query, setQuery] = useState('');
+  const handleSearch = e => {
+    setQuery(e.target.value);
+    changeSearchText(e.target.value);
+    setUserList(config);
+  };
 
   useEffect(() => {
     initUser();
-    // initEdit();
+    initEdit();
+    // loadNextPage(config, users);
     setUserList(config);
-    console.log('again!');
   }, []);
 
   const handleCreate = e => {
@@ -69,6 +86,30 @@ const Home = ({
 
   const handleDelete = (id, users) => {
     deleteUser(id, users);
+  };
+
+  const order = [
+    'name',
+    'sex',
+    'rank',
+    'startdate',
+    'phone',
+    'email',
+    'superiorname'
+  ];
+  const [asc, setAsc] = useState(true);
+  const handleSort = e => {
+    const typ = order.indexOf(e.target.id);
+    if (asc) {
+      setAsc(!asc);
+      changeSortType(2 * typ + 1);
+      setUserList(config);
+    } else {
+      setAsc(!asc);
+      changeSortType(2 * typ + 2);
+      setUserList(config);
+    }
+    // console.log(e.target.id);
   };
 
   const StyledTableCell = withStyles(theme => ({
@@ -176,7 +217,7 @@ const Home = ({
             <MenuIcon />
           </IconButton> */}
           <Typography className={classes.title} variant='h6' noWrap>
-            US Army Personnel Registration
+            US Army Personnel Registry
           </Typography>
           <div className={classes.search}>
             <div className={classes.searchIcon}>
@@ -187,6 +228,10 @@ const Home = ({
               classes={{
                 root: classes.inputRoot,
                 input: classes.inputInput
+              }}
+              value={query}
+              onChange={e => {
+                handleSearch(e);
               }}
               inputProps={{ 'aria-label': 'search' }}
             />
@@ -218,13 +263,97 @@ const Home = ({
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>Avatar</StyledTableCell>
-                    <StyledTableCell align='right'>Name</StyledTableCell>
-                    <StyledTableCell align='right'>Sex</StyledTableCell>
-                    <StyledTableCell align='right'>Rank</StyledTableCell>
-                    <StyledTableCell align='right'>Start Date</StyledTableCell>
-                    <StyledTableCell align='right'>Phone</StyledTableCell>
-                    <StyledTableCell align='right'>Email</StyledTableCell>
-                    <StyledTableCell align='right'>Superior</StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='name'
+                    >
+                      Name
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 1 && <ArrowUpwardIcon />}
+                        {config.sortType === 2 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='sex'
+                    >
+                      Sex
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 3 && <ArrowUpwardIcon />}
+                        {config.sortType === 4 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='rank'
+                    >
+                      Rank
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 5 && <ArrowUpwardIcon />}
+                        {config.sortType === 6 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='startdate'
+                    >
+                      Start Date
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 7 && <ArrowUpwardIcon />}
+                        {config.sortType === 8 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='phone'
+                    >
+                      Phone
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 9 && <ArrowUpwardIcon />}
+                        {config.sortType === 10 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='email'
+                    >
+                      Email
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 11 && <ArrowUpwardIcon />}
+                        {config.sortType === 12 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell
+                      align='right'
+                      onClick={e => {
+                        handleSort(e);
+                      }}
+                      id='superiorname'
+                    >
+                      Superior
+                      <span style={{ position: 'relative', top: 5 }}>
+                        {config.sortType === 13 && <ArrowUpwardIcon />}
+                        {config.sortType === 14 && <ArrowDownwardIcon />}
+                      </span>
+                    </StyledTableCell>
                     <StyledTableCell align='right'># of D.S.</StyledTableCell>
                     <StyledTableCell align='center'>Edit</StyledTableCell>
                     <StyledTableCell align='center'>Delete</StyledTableCell>
@@ -303,7 +432,9 @@ const Home = ({
             <InfiniteScroll
               dataLength={users.length}
               next={() => {
+                // if (!lock) {
                 loadNextPage(config, users);
+                // }
               }}
               hasMore={users.length / pageSize === pageNumber - 1}
               loader={<h4>Loading...</h4>}
@@ -350,6 +481,7 @@ const mapStateToProps = state => {
     deleteError: state.users.deleteError,
     config: state.users.config,
     alertContent: state.alert.alertContent
+    // lock: state.users.lock
   };
 };
 
@@ -360,7 +492,9 @@ const mapStateToDispatch = dispatch => {
     initEdit: () => dispatch(initEdit()),
     deleteUser: (id, users) => dispatch(deleteUser(id, users)),
     loadNextPage: (config, users) => dispatch(loadNextPage(config, users)),
-    resetConfig: () => dispatch(resetConfig())
+    resetConfig: () => dispatch(resetConfig()),
+    changeSortType: typ => dispatch(changeSortType(typ)),
+    changeSearchText: query => dispatch(changeSearchText(query))
   };
 };
 

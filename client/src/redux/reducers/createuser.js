@@ -1,13 +1,13 @@
 const initState = {
-  avatar: '',
-  name: '',
-  sex: '',
-  rank: '',
-  startdate: '',
-  phone: '',
-  email: '',
-  superior: '',
-  superiorname: '',
+  // avatar: '',
+  // name: '',
+  // sex: '',
+  // rank: '',
+  // startdate: '',
+  // phone: '',
+  // email: '',
+  // superior: '',
+  // superiorname: '',
   error: null,
   isLoading: false,
   createSuccess: false
@@ -21,7 +21,6 @@ const createUser = (state = initState, action) => {
     case 'CREATE_USER_SUCCESS':
       return {
         ...state,
-        ...payload,
         isLoading: false,
         createSuccess: true,
         error: null // need this? or just in init?

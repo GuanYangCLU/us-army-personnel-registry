@@ -81,10 +81,10 @@ const getUsers = async params => {
     {}, // 0
     { name: 1 }, // 1
     { name: -1 }, // 2
-    { rank: 1 }, // 3
-    { rank: -1 }, // 4
-    { sex: 1 }, // 5
-    { sex: -1 }, // 6
+    { sex: 1 }, // 3
+    { sex: -1 }, // 4
+    { rank: 1 }, // 5
+    { rank: -1 }, // 6
     { startdate: 1 }, // 7
     { startdate: -1 }, // 8
     { phone: 1 }, // 9
