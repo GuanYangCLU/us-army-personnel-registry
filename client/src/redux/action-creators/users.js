@@ -425,3 +425,46 @@ export const changeSearchText = query => dispatch => {
     payload: { searchText: query }
   });
 };
+
+export const getSuperior = id => dispatch => {
+  if (!id) return;
+  dispatch(setUserListStart());
+  const config = {
+    pageSize: 3,
+    pageNumber: 1,
+    sortType: 0,
+    searchText: '__NO_SEARCH_TEXT__',
+    superiorId: '__NO_SUPERIOR_ID__'
+  };
+  axios
+    .get(`http://localhost:5000/api/users/${id}`)
+    .then(res => {
+      console.log('getSup: ', res.data);
+      dispatch(setUserListSuccess([res.data.data.user], config));
+    })
+    .catch(err => dispatch(setUserListError(err)));
+};
+
+export const getSubordinates = (id, len) => dispatch => {
+  if (len === 0) return;
+  dispatch(setUserListStart());
+  const config = {
+    pageSize: 3,
+    pageNumber: 1,
+    sortType: 0,
+    searchText: '__NO_SEARCH_TEXT__',
+    superiorId: id
+  };
+  axios
+    .get(
+      `http://localhost:5000/api/users/${config.pageSize}/${
+        config.pageNumber
+      }/${config.sortType}/${config.searchText}/${config.superiorId}`
+    )
+    .then(res => {
+      console.log('getSup: ', res.data);
+      config.pageNumber++;
+      dispatch(setUserListSuccess(res.data.docs, config));
+    })
+    .catch(err => dispatch(setUserListError(err)));
+};

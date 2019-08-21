@@ -10,7 +10,9 @@ import {
   initEdit,
   deleteUser,
   changeSortType,
-  changeSearchText
+  changeSearchText,
+  getSuperior,
+  getSubordinates
 } from '../redux/action-creators/users';
 import { Loading, Alert } from './utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -58,7 +60,9 @@ const Home = ({
   deleteError,
   alertContent,
   changeSortType,
-  changeSearchText
+  changeSearchText,
+  getSuperior,
+  getSubordinates
   // lock
 }) => {
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
@@ -390,10 +394,21 @@ const Home = ({
                       <StyledTableCell align='right'>
                         <a href={'mailto: ' + user.email}>{user.email}</a>
                       </StyledTableCell>
-                      <StyledTableCell align='right'>
+                      <StyledTableCell
+                        align='right'
+                        onClick={() => getSuperior(user.superior)}
+                      >
                         {user.superiorname}
                       </StyledTableCell>
-                      <StyledTableCell align='right'>
+                      <StyledTableCell
+                        align='right'
+                        onClick={() =>
+                          getSubordinates(
+                            user._id,
+                            user.directsubordinates.length
+                          )
+                        }
+                      >
                         {user.directsubordinates.length}
                       </StyledTableCell>
                       <StyledTableCell align='right'>
@@ -427,7 +442,7 @@ const Home = ({
               </Table>
             </Paper>
 
-            {error && <h4>No more soldiers</h4>}
+            {/* {error && <h4>No more soldiers</h4>} */}
 
             <InfiniteScroll
               dataLength={users.length}
@@ -494,7 +509,9 @@ const mapStateToDispatch = dispatch => {
     loadNextPage: (config, users) => dispatch(loadNextPage(config, users)),
     resetConfig: () => dispatch(resetConfig()),
     changeSortType: typ => dispatch(changeSortType(typ)),
-    changeSearchText: query => dispatch(changeSearchText(query))
+    changeSearchText: query => dispatch(changeSearchText(query)),
+    getSuperior: id => dispatch(getSuperior(id)),
+    getSubordinates: (id, len) => dispatch(getSubordinates(id, len))
   };
 };
 
