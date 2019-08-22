@@ -47,10 +47,12 @@ const EditUser = ({
   error,
   getError,
   setSuperiorList,
-  superiorList
+  superiorList,
+  users,
+  config
 }) => {
   const id = match.params.userId;
-  console.log('this time: ', superiorList);
+  console.log('this time: ', users);
 
   useEffect(() => {
     setSuperiorList(id);
@@ -96,6 +98,7 @@ const EditUser = ({
     //   email,
     //   superior
     // });
+
     editUser(
       id,
       {
@@ -108,7 +111,9 @@ const EditUser = ({
         email,
         superior
       },
-      initEdit
+      initEdit,
+      users,
+      config
     );
   };
 
@@ -474,14 +479,17 @@ const mapStateToProps = state => {
     // use this user in file check whether the file be changed in the very bottom
     error: state.editUser.error,
     getError: state.getUser.error,
-    superiorList: state.users.users // need change
+    superiorList: state.superiors.superiorList, // need change
+    users: state.users.users,
+    config: state.users.config
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     setAlert: alert => dispatch(setAlert(alert)),
-    editUser: (data, history) => dispatch(editUser(data, history)),
+    editUser: (id, data, initEdit, users, config) =>
+      dispatch(editUser(id, data, initEdit, users, config)),
     initEdit: () => dispatch(initEdit()),
     getUser: (id, setUserData) => dispatch(getUser(id, setUserData)),
     setSuperiorList: id => dispatch(setSuperiorList(id))

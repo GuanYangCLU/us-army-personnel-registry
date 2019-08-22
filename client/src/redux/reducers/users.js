@@ -1,6 +1,6 @@
 const initState = {
   config: {
-    pageSize: 3,
+    pageSize: 6,
     pageNumber: 1,
     sortType: 0,
     searchText: '__NO_SEARCH_TEXT__',
@@ -64,12 +64,12 @@ const users = (state = initState, action) => {
         // deleteId: payload._id,
         isLoading: false
       };
-    case 'SET_SUPERIOR_LIST_SUCCESS':
-      return {
-        ...state,
-        users: payload,
-        isLoading: false
-      };
+    // case 'SET_SUPERIOR_LIST_SUCCESS':
+    //   return {
+    //     ...state,
+    //     users: payload,
+    //     isLoading: false
+    //   };
     case 'CHANGE_SORT_TYPE':
       state.config.sortType = payload.sortType;
       state.config.pageNumber = 1;

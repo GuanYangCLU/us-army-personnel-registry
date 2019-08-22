@@ -73,11 +73,13 @@ const Home = ({
     setUserList(config);
   };
 
+  console.log(pageNumber, ' HERE');
+
   useEffect(() => {
     initUser();
     initEdit();
-    // loadNextPage(config, users);
-    setUserList(config);
+    loadNextPage(config, users);
+    // setUserList(config);
   }, []);
 
   const handleCreate = e => {
@@ -263,215 +265,216 @@ const Home = ({
         ) : (
           <div>
             <Paper className={classes.root}>
-              <Table className={classes.table} size='small'>
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>Avatar</StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='name'
-                    >
-                      Name
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 1 && <ArrowUpwardIcon />}
-                        {config.sortType === 2 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='sex'
-                    >
-                      Sex
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 3 && <ArrowUpwardIcon />}
-                        {config.sortType === 4 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='rank'
-                    >
-                      Rank
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 5 && <ArrowUpwardIcon />}
-                        {config.sortType === 6 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='startdate'
-                    >
-                      Start Date
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 7 && <ArrowUpwardIcon />}
-                        {config.sortType === 8 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='phone'
-                    >
-                      Phone
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 9 && <ArrowUpwardIcon />}
-                        {config.sortType === 10 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='email'
-                    >
-                      Email
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 11 && <ArrowUpwardIcon />}
-                        {config.sortType === 12 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align='right'
-                      onClick={e => {
-                        handleSort(e);
-                      }}
-                      id='superiorname'
-                    >
-                      Superior
-                      <span style={{ position: 'relative', top: 5 }}>
-                        {config.sortType === 13 && <ArrowUpwardIcon />}
-                        {config.sortType === 14 && <ArrowDownwardIcon />}
-                      </span>
-                    </StyledTableCell>
-                    <StyledTableCell align='right'># of D.S.</StyledTableCell>
-                    <StyledTableCell align='center'>Edit</StyledTableCell>
-                    <StyledTableCell align='center'>Delete</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {users.map(user => (
-                    <StyledTableRow key={user._id}>
-                      <StyledTableCell component='th' scope='row'>
-                        <Grid container justify='center' alignItems='center'>
-                          <Avatar
-                            alt='Remy Sharp'
-                            src={user.avatar}
-                            className={classes.avatar}
-                          />
-                          {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.bigAvatar} /> */}
-                        </Grid>
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        {user.name}
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        {user.sex}
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        {user.rank}
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        {user.startdate.slice(0, 10)}
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        <a href={'tel: ' + user.phone}>{user.phone}</a>
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        <a href={'mailto: ' + user.email}>{user.email}</a>
+              <InfiniteScroll
+                dataLength={users.length}
+                next={() => {
+                  // if (!lock) {
+                  loadNextPage(config, users);
+                  // }
+                }}
+                hasMore={users.length / pageSize === pageNumber - 1}
+                loader={<h4>Loading...</h4>}
+                endMessage={
+                  <p style={{ textAlign: 'center' }}>
+                    <b>Yay! You have seen it all</b>
+                  </p>
+                }
+                // refreshFunction={this.refresh}
+                // pullDownToRefresh
+                // pullDownToRefreshContent={
+                //   <h3 style={{ textAlign: 'center' }}>
+                //     &#8595; Pull down to refresh
+                //   </h3>
+                // }
+                // releaseToRefreshContent={
+                //   <h3 style={{ textAlign: 'center' }}>
+                //     &#8593; Release to refresh
+                //   </h3>
+                // }
+              >
+                <Table className={classes.table} size='small'>
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Avatar</StyledTableCell>
+                      <StyledTableCell
+                        align='right'
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='name'
+                      >
+                        Name
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 1 && <ArrowUpwardIcon />}
+                          {config.sortType === 2 && <ArrowDownwardIcon />}
+                        </span>
                       </StyledTableCell>
                       <StyledTableCell
                         align='right'
-                        onClick={() => getSuperior(user.superior)}
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='sex'
                       >
-                        {user.superiorname}
+                        Sex
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 3 && <ArrowUpwardIcon />}
+                          {config.sortType === 4 && <ArrowDownwardIcon />}
+                        </span>
                       </StyledTableCell>
                       <StyledTableCell
                         align='right'
-                        onClick={() =>
-                          getSubordinates(
-                            user._id,
-                            user.directsubordinates.length
-                          )
-                        }
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='rank'
                       >
-                        {user.directsubordinates.length}
+                        Rank
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 5 && <ArrowUpwardIcon />}
+                          {config.sortType === 6 && <ArrowDownwardIcon />}
+                        </span>
                       </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        <Fab
-                          color='secondary'
-                          aria-label='edit'
-                          className={classes.fab}
-                          onClick={() => {
-                            handleEdit(user._id);
-                          }}
+                      <StyledTableCell
+                        align='right'
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='startdate'
+                      >
+                        Start Date
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 7 && <ArrowUpwardIcon />}
+                          {config.sortType === 8 && <ArrowDownwardIcon />}
+                        </span>
+                      </StyledTableCell>
+                      <StyledTableCell
+                        align='right'
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='phone'
+                      >
+                        Phone
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 9 && <ArrowUpwardIcon />}
+                          {config.sortType === 10 && <ArrowDownwardIcon />}
+                        </span>
+                      </StyledTableCell>
+                      <StyledTableCell
+                        align='right'
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='email'
+                      >
+                        Email
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 11 && <ArrowUpwardIcon />}
+                          {config.sortType === 12 && <ArrowDownwardIcon />}
+                        </span>
+                      </StyledTableCell>
+                      <StyledTableCell
+                        align='right'
+                        onClick={e => {
+                          handleSort(e);
+                        }}
+                        id='superiorname'
+                      >
+                        Superior
+                        <span style={{ position: 'relative', top: 5 }}>
+                          {config.sortType === 13 && <ArrowUpwardIcon />}
+                          {config.sortType === 14 && <ArrowDownwardIcon />}
+                        </span>
+                      </StyledTableCell>
+                      <StyledTableCell align='right'># of D.S.</StyledTableCell>
+                      <StyledTableCell align='center'>Edit</StyledTableCell>
+                      <StyledTableCell align='center'>Delete</StyledTableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {users.map(user => (
+                      <StyledTableRow key={user._id}>
+                        <StyledTableCell component='th' scope='row'>
+                          <Grid container justify='center' alignItems='center'>
+                            <Avatar
+                              alt='Remy Sharp'
+                              src={user.avatar}
+                              className={classes.avatar}
+                            />
+                            {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.bigAvatar} /> */}
+                          </Grid>
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          {user.name}
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          {user.sex}
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          {user.rank}
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          {user.startdate.slice(0, 10)}
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          <a href={'tel: ' + user.phone}>{user.phone}</a>
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          <a href={'mailto: ' + user.email}>{user.email}</a>
+                        </StyledTableCell>
+                        <StyledTableCell
+                          align='right'
+                          onClick={() => getSuperior(user.superior)}
                         >
-                          {/* <Icon>edit_icon</Icon> */}
-                          <EditIcon />
-                        </Fab>
-                      </StyledTableCell>
-                      <StyledTableCell align='right'>
-                        <Fab
-                          // disabled
-                          aria-label='delete'
-                          className={classes.fab}
-                          onClick={() => {
-                            handleDelete(user._id, users);
-                          }}
+                          {user.superiorname}
+                        </StyledTableCell>
+                        <StyledTableCell
+                          align='right'
+                          onClick={() =>
+                            getSubordinates(
+                              user._id,
+                              user.directsubordinates.length
+                            )
+                          }
                         >
-                          <DeleteIcon />
-                        </Fab>
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          {user.directsubordinates.length}
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          <Fab
+                            color='secondary'
+                            aria-label='edit'
+                            className={classes.fab}
+                            onClick={() => {
+                              handleEdit(user._id);
+                            }}
+                          >
+                            {/* <Icon>edit_icon</Icon> */}
+                            <EditIcon />
+                          </Fab>
+                        </StyledTableCell>
+                        <StyledTableCell align='right'>
+                          <Fab
+                            // disabled
+                            aria-label='delete'
+                            className={classes.fab}
+                            onClick={() => {
+                              handleDelete(user._id, users);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </Fab>
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </InfiniteScroll>
             </Paper>
 
             {/* {error && <h4>No more soldiers</h4>} */}
 
-            <InfiniteScroll
-              dataLength={users.length}
-              next={() => {
-                // if (!lock) {
-                loadNextPage(config, users);
-                // }
-              }}
-              hasMore={users.length / pageSize === pageNumber - 1}
-              loader={<h4>Loading...</h4>}
-              endMessage={
-                <p style={{ textAlign: 'center' }}>
-                  <b>Yay! You have seen it all</b>
-                </p>
-              }
-              // refreshFunction={this.refresh}
-              // pullDownToRefresh
-              // pullDownToRefreshContent={
-              //   <h3 style={{ textAlign: 'center' }}>
-              //     &#8595; Pull down to refresh
-              //   </h3>
-              // }
-              // releaseToRefreshContent={
-              //   <h3 style={{ textAlign: 'center' }}>
-              //     &#8593; Release to refresh
-              //   </h3>
-              // }
-            >
-              <div style={{ color: 'white' }}>
+            {/* <div style={{ color: 'white' }}>
                 {users.map(user => {
                   return (
                     <li>
@@ -479,8 +482,7 @@ const Home = ({
                     </li>
                   );
                 })}
-              </div>
-            </InfiniteScroll>
+              </div> */}
           </div>
         )}
       </div>

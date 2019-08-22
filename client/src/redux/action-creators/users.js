@@ -40,13 +40,6 @@ const noMoreUsers = () => {
   };
 };
 
-const setSuperiorListSuccess = users => {
-  return {
-    type: 'SET_SUPERIOR_LIST_SUCCESS',
-    payload: users
-  };
-};
-
 export const setUserList = config => dispatch => {
   dispatch(setUserListStart());
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
@@ -73,8 +66,8 @@ export const loadNextPage = (config, users) => dispatch => {
   // if (payload.users.length / payload.config.pageSize < payload.config.pageNumber - 1) {
   //   dispatch(fixPageNumber);
   //   return
-  // }
-  dispatch(setUserListStart());
+  // // }
+  // dispatch(setUserListStart());
   const { pageSize, pageNumber, sortType, searchText, superiorId } = config;
   // console.log(config);
   axios
@@ -94,10 +87,10 @@ export const loadNextPage = (config, users) => dispatch => {
       //   // dispatch(noMoreUsers());
       //   throw new Error('No more soldiers');
       // } else {
-      setTimeout(() => {
-        dispatch(setUserListSuccess(users.concat(res.data.docs), config));
-        // setUsers(fakeD);
-      }, 1500);
+      // setTimeout(() => {
+      dispatch(setUserListSuccess(users.concat(res.data.docs), config));
+      // setUsers(fakeD);
+      // }, 1500);
       // }
     })
     .catch(err => dispatch(setUserListError(err)));
@@ -107,7 +100,7 @@ export const resetConfig = () => dispatch => {
   dispatch(setUserListStart());
   // Initialize Config
   const config = {
-    pageSize: 3,
+    pageSize: 6,
     pageNumber: 1,
     sortType: 0,
     searchText: '__NO_SEARCH_TEXT__',
@@ -140,15 +133,36 @@ export const resetConfig = () => dispatch => {
     .catch(err => dispatch(setUserListError(err)));
 };
 
+const setSuperiorListStart = () => {
+  return {
+    type: 'SET_SUPERIOR_LIST_START',
+    payload: { error: null } // init
+  };
+};
+
+const setSuperiorListSuccess = users => {
+  return {
+    type: 'SET_SUPERIOR_LIST_SUCCESS',
+    payload: users
+  };
+};
+
+const setSuperiorListError = err => {
+  return {
+    type: 'SET_SUPERIOR_LIST_ERROR',
+    payload: { error: err } // init
+  };
+};
+
 export const setSuperiorList = id => dispatch => {
-  dispatch(setUserListStart());
+  dispatch(setSuperiorListStart());
   axios
     .get(`http://localhost:5000/api/users/loopsafe/${id}`)
     .then(res => {
       console.log(res.data);
       dispatch(setSuperiorListSuccess(res.data.data.validSuperiors));
     })
-    .catch(err => dispatch(setUserListError(err)));
+    .catch(err => dispatch(setSuperiorListError(err)));
 };
 
 // --------------
@@ -243,8 +257,15 @@ const editUserError = err => {
   };
 };
 
-export const editUser = (id, userData, initEdit) => dispatch => {
+export const editUser = (
+  id,
+  userData,
+  initEdit,
+  users,
+  configData
+) => dispatch => {
   dispatch(editUserStart());
+
   const config = {
     headers: {
       'Content-Type': 'application/json'
@@ -257,13 +278,51 @@ export const editUser = (id, userData, initEdit) => dispatch => {
       .then(res => {
         // console.log(res.data);
         // console.log(res.data.data.user.name);
+
         userData = { ...userData, superiorname: res.data.data.user.name };
         axios
           .put(`http://localhost:5000/api/users/${id}`, userData, config)
           .then(res => {
             dispatch(editUserSuccess()); // res.data
+
             // other method:
             // history.push('/');
+            let {
+              pageSize,
+              pageNumber,
+              sortType,
+              searchText,
+              superiorId
+            } = configData;
+            const index = users.indexOf(
+              users.filter(user => user._id.toString() === id.toString())[0]
+            );
+            pageNumber = Math.ceil((index + 1) / pageSize);
+            users = users.splice(0, pageSize * (pageNumber - 1));
+
+            console.log(index);
+            console.log(pageNumber, '???@@@');
+            console.log(users, '@@@');
+
+            dispatch(
+              loadNextPage(
+                {
+                  pageSize,
+                  pageNumber,
+                  sortType,
+                  searchText,
+                  superiorId
+                },
+                users
+              )
+              // setUserListSuccess(users, {
+              //   pageSize,
+              //   pageNumber,
+              //   sortType,
+              //   searchText,
+              //   superiorId
+              // })
+            );
             initEdit();
           })
           .catch(err => dispatch(editUserError(err)));
@@ -277,6 +336,33 @@ export const editUser = (id, userData, initEdit) => dispatch => {
         dispatch(editUserSuccess()); // res.data
         // other method:
         // history.push('/');
+        let {
+          pageSize,
+          pageNumber,
+          sortType,
+          searchText,
+          superiorId
+        } = configData;
+        const index = users.indexOf(
+          users.filter(user => user._id.toString() === id.toString())[0]
+        );
+        pageNumber = Math.ceil((index + 1) / pageSize);
+        users = users.splice(0, pageSize * (pageNumber - 1));
+        console.log(pageSize);
+        console.log(pageNumber, '???');
+        console.log(users, '###');
+        dispatch(
+          loadNextPage(
+            {
+              pageSize,
+              pageNumber,
+              sortType,
+              searchText,
+              superiorId
+            },
+            users
+          )
+        );
         initEdit();
       })
       .catch(err => dispatch(editUserError(err)));
@@ -430,7 +516,7 @@ export const getSuperior = id => dispatch => {
   if (!id) return;
   dispatch(setUserListStart());
   const config = {
-    pageSize: 3,
+    pageSize: 6,
     pageNumber: 1,
     sortType: 0,
     searchText: '__NO_SEARCH_TEXT__',
@@ -449,7 +535,7 @@ export const getSubordinates = (id, len) => dispatch => {
   if (len === 0) return;
   dispatch(setUserListStart());
   const config = {
-    pageSize: 3,
+    pageSize: 6,
     pageNumber: 1,
     sortType: 0,
     searchText: '__NO_SEARCH_TEXT__',

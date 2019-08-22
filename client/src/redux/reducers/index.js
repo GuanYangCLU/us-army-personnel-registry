@@ -5,6 +5,7 @@ import editUser from './edituser';
 // import deleteUser from './deleteuser';
 import alert from './alert';
 import getUser from './getuser';
+import superiors from './superiors';
 
 const reducer = combineReducers({
   users,
@@ -12,6 +13,7 @@ const reducer = combineReducers({
   editUser,
   // deleteUser,
   getUser,
+  superiors,
   alert
 });
 
